@@ -1,0 +1,15 @@
+    /**
+     * Indicate that the connection attempt failed and notify the UI Activity.
+     */
+    private void connectionFailed() {
+        // Send a failure message back to the Activity
+        Message msg = mHandler.obtainMessage(BluetoothChatActivity.MESSAGE_TOAST);
+        Bundle bundle = new Bundle();
+        bundle.putString(BluetoothChatActivity.TOAST, "Unable to connect device");
+        msg.setData(bundle);
+        mHandler.sendMessage(msg);
+
+        // Start the service over to restart listening mode
+        BluetoothChatService.this.start();
+    }
+

@@ -1,0 +1,7 @@
+        /**
+         * @hide
+         */
+        public ViewHolder() {
+            super();
+        }
+

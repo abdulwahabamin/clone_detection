@@ -1,0 +1,13 @@
+	@TargetApi(19)
+	public static double getHddAvailable() {
+		StatFs stat = new StatFs(Environment.getRootDirectory().getPath());
+		try {
+			double sdAvailSize = (double) stat.getAvailableBlocksLong()
+					* (double) stat.getBlockSizeLong();
+//One binary gigabyte equals 1,073,741,824 bytes.
+			double gigaAvailable = sdAvailSize / 1073741824;
+			return gigaAvailable;
+		}catch(java.lang.NoSuchMethodError e) {}
+		return 0;
+	}
+

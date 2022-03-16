@@ -1,0 +1,31 @@
+    /**
+     * Method that send a kill signal to a process.
+     *
+     * @param context The current context (needed if console == null)
+     * @param process The process which to send the signal
+     * @param console The console in which execute the program. <code>null</code>
+     * to attach to the default console
+     * @throws FileNotFoundException If the initial directory not exists
+     * @throws IOException If initial directory couldn't be checked
+     * @throws InvalidCommandDefinitionException If the command has an invalid definition
+     * @throws NoSuchFileOrDirectory If the file or directory was not found
+     * @throws ConsoleAllocException If the console can't be allocated
+     * @throws InsufficientPermissionsException If an operation requires elevated permissions
+     * @throws CommandNotFoundException If the command was not found
+     * @throws OperationTimeoutException If the operation exceeded the maximum time of wait
+     * @throws ExecutionException If the operation returns a invalid exit code
+     * @throws CancelledOperationException If the operation was cancelled
+     * @see ProcessIdExecutable
+     */
+    public static void sendSignal(
+            Context context, int process, Console console)
+            throws FileNotFoundException, IOException, ConsoleAllocException,
+            NoSuchFileOrDirectory, InsufficientPermissionsException,
+            CommandNotFoundException, OperationTimeoutException,
+            ExecutionException, InvalidCommandDefinitionException, CancelledOperationException {
+        Console c = ensureConsole(context, console);
+        SendSignalExecutable executable =
+                c.getExecutableFactory().newCreator().createKillExecutable(process);
+        execute(context, executable, c);
+    }
+

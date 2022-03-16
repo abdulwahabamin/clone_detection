@@ -1,0 +1,95 @@
+    public boolean onTouchEvent(android.view.MotionEvent ev) {
+        if (super.onTouchEvent(ev)) {
+            return true;
+        }
+        if ((mVelocityViewPager == null) || (mVelocityViewPager.getAdapter().getCount() == 0)) {
+            return false;
+        }
+
+        final int action = ev.getAction() & MotionEventCompat.ACTION_MASK;
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+                mLastMotionX = ev.getX();
+                break;
+
+            case MotionEvent.ACTION_MOVE: {
+                final int activePointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+                final float x = MotionEventCompat.getX(ev, activePointerIndex);
+                final float deltaX = x - mLastMotionX;
+
+                if (!mIsDragging) {
+                    if (Math.abs(deltaX) > mTouchSlop) {
+                        mIsDragging = true;
+                    }
+                }
+
+                if (mIsDragging) {
+                    mLastMotionX = x;
+                    if (mVelocityViewPager.isFakeDragging() || mVelocityViewPager.beginFakeDrag()) {
+                        mVelocityViewPager.fakeDragBy(deltaX);
+                    }
+                }
+
+                break;
+            }
+
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                if (!mIsDragging) {
+                    final int count = mVelocityViewPager.getAdapter().getCount();
+                    final int width = getWidth();
+                    final float halfWidth = width / 2f;
+                    final float sixthWidth = width / 6f;
+                    final float leftThird = halfWidth - sixthWidth;
+                    final float rightThird = halfWidth + sixthWidth;
+                    final float eventX = ev.getX();
+
+                    if (eventX < leftThird) {
+                        if (mCurrentPage > 0) {
+                            if (action != MotionEvent.ACTION_CANCEL) {
+                                mVelocityViewPager.setCurrentItem(mCurrentPage - 1);
+                            }
+                            return true;
+                        }
+                    } else if (eventX > rightThird) {
+                        if (mCurrentPage < count - 1) {
+                            if (action != MotionEvent.ACTION_CANCEL) {
+                                mVelocityViewPager.setCurrentItem(mCurrentPage + 1);
+                            }
+                            return true;
+                        }
+                    } else {
+                        //Middle third
+                        if (mCenterItemClickListener != null && action != MotionEvent.ACTION_CANCEL) {
+                            mCenterItemClickListener.onCenterItemClick(mCurrentPage);
+                        }
+                    }
+                }
+
+                mIsDragging = false;
+                mActivePointerId = INVALID_POINTER;
+                if (mVelocityViewPager.isFakeDragging()) mVelocityViewPager.endFakeDrag();
+                break;
+
+            case MotionEventCompat.ACTION_POINTER_DOWN: {
+                final int index = MotionEventCompat.getActionIndex(ev);
+                mLastMotionX = MotionEventCompat.getX(ev, index);
+                mActivePointerId = MotionEventCompat.getPointerId(ev, index);
+                break;
+            }
+
+            case MotionEventCompat.ACTION_POINTER_UP:
+                final int pointerIndex = MotionEventCompat.getActionIndex(ev);
+                final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
+                if (pointerId == mActivePointerId) {
+                    final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+                    mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
+                }
+                mLastMotionX = MotionEventCompat.getX(ev, MotionEventCompat.findPointerIndex(ev, mActivePointerId));
+                break;
+        }
+
+        return true;
+    }
+
